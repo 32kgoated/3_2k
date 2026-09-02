@@ -24,16 +24,16 @@
             scroll-snap-type: y mandatory;
         }
 
-        html { cursor: url('cursor.png') 8 8, auto; }
+        html { cursor: url('cursor.png') 0 0, auto; }
         body {
             font-family: 'Inter', sans-serif;
             background: #0a0a0a;
             color: #fff;
             overflow-x: hidden;
-            cursor: url('cursor.png') 8 8, auto;
+            cursor: url('cursor.png') 0 0, auto;
         }
         a, button, .nav-dot, .gb-btn, .play-btn, .ctrl-btn, .track-btn, .volume-icon, .progress-bar {
-            cursor: url('cursor.png') 8 8, pointer !important;
+            cursor: url('cursor.png') 0 0, pointer !important;
         }
 
         .section {
@@ -842,9 +842,9 @@
             </div>
 
             <div class="player-controls">
-                <button class="ctrl-btn" title="Previous">⏮</button>
+                <button class="ctrl-btn" id="prevBtn" title="Previous">⏮</button>
                 <button class="play-btn" id="playBtn" title="Play">▶</button>
-                <button class="ctrl-btn" title="Next">⏭</button>
+                <button class="ctrl-btn" id="nextBtn" title="Next">⏭</button>
                 <div class="volume-wrapper">
                     <button class="volume-icon" id="volIcon">🔊</button>
                     <div class="volume-slider-wrap">
@@ -1005,6 +1005,16 @@
         }
         document.querySelectorAll('.track-btn').forEach(btn => {
             btn.addEventListener('click', () => switchTrack(btn.dataset.track));
+        });
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            const ids = Object.keys(tracks);
+            const idx = ids.indexOf(currentTrack);
+            switchTrack(ids[(idx - 1 + ids.length) % ids.length]);
+        });
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            const ids = Object.keys(tracks);
+            const idx = ids.indexOf(currentTrack);
+            switchTrack(ids[(idx + 1) % ids.length]);
         });
 
         function formatTime(s) {
