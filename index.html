@@ -730,6 +730,17 @@
             margin-top: 8px;
             font-family: 'JetBrains Mono', monospace;
         }
+        .gb-note.pinned {
+            background: rgba(255,255,255,0.10);
+            border-color: rgba(255,255,255,0.18);
+            box-shadow: 0 0 12px rgba(255,255,255,0.08);
+            order: -1;
+        }
+        .gb-note.pinned .gb-note-name::after {
+            content: '  📌';
+            font-size: 10px;
+            opacity: 0.7;
+        }
 
         /* Responsive */
         @media (max-width: 600px) {
@@ -877,28 +888,39 @@
         const durationEl = document.getElementById('duration');
         let isPlaying = false;
         let hasInteracted = false;
+        audio.volume = 0.75;
 
-        function startPlayback() {
-            if (hasInteracted) return;
-            hasInteracted = true;
-            audio.play().then(() => {
+        function tryPlay(withSound) {
+            audio.muted = !withSound;
+            return audio.play().then(() => {
                 playBtn.textContent = '⏸';
                 isPlaying = true;
-            }).catch(() => {});
+                if (withSound) hasInteracted = true;
+                return true;
+            }).catch(() => false);
         }
 
-        // Try auto-play on load
+        // Try autoplay with sound instantly, fallback to muted autoplay (browsers block sound without gesture)
+        document.addEventListener('DOMContentLoaded', () => {
+            tryPlay(true).then(ok => { if (!ok) tryPlay(false); });
+        });
         window.addEventListener('load', () => {
-            audio.play().then(() => {
-                playBtn.textContent = '⏸';
-                isPlaying = true;
-                hasInteracted = true;
-            }).catch(() => {});
+            if (!isPlaying) tryPlay(true).then(ok => { if (!ok && !isPlaying) tryPlay(false); });
         });
 
-        // Fallback: play on first user interaction
-        document.addEventListener('click', startPlayback, { once: true });
-        document.addEventListener('keydown', startPlayback, { once: true });
+        // Any tiny interaction (scroll, move, touch) unmutes — feels like auto-play
+        const unlockEvents = ['click','keydown','touchstart','wheel','scroll','mousemove','pointerdown'];
+        unlockEvents.forEach(ev => {
+            document.addEventListener(ev, () => {
+                if (hasInteracted) return;
+                hasInteracted = true;
+                audio.muted = false;
+                // re-apply volume curve
+                const v = parseInt(document.getElementById('volSlider').value || '75');
+                audio.volume = Math.max(0, Math.min(1, (v/100)**1.5));
+                if (!isPlaying) audio.play().then(() => { playBtn.textContent = '⏸'; isPlaying = true; }).catch(()=>{});
+            }, { once: true, passive: true });
+        });
 
         function formatTime(s) {
             if (isNaN(s)) return '0:00';
@@ -1004,9 +1026,14 @@
             const notes = await loadNotes();
             gbWall.innerHTML = '';
             if (notes.length === 0) return;
-            [...notes].reverse().forEach(n => {
+            const isPinned = n => n.name.toLowerCase() === '3_2k';
+            const pinned = notes.filter(isPinned);
+            const rest = notes.filter(n => !isPinned(n));
+            const ordered = [...pinned, ...[...rest].reverse()];
+            // pinned first, then newest rest
+            ordered.forEach(n => {
                 const div = document.createElement('div');
-                div.className = 'gb-note';
+                div.className = 'gb-note' + (isPinned(n) ? ' pinned' : '');
                 const time = n.time ? new Date(n.time).toLocaleDateString() : '';
                 div.innerHTML = `<div class="gb-note-name">${escapeHtml(n.name)}</div><div class="gb-note-msg">${escapeHtml(n.msg)}</div><div class="gb-note-time">${escapeHtml(time)}</div>`;
                 gbWall.appendChild(div);
