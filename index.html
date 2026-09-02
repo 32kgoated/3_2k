@@ -24,16 +24,17 @@
             scroll-snap-type: y mandatory;
         }
 
-        html { cursor: url('cursor.png') 0 0, auto; }
+        *, *::before, *::after { cursor: url('cursor.png') 16 16, auto !important; }
+        html { cursor: url('cursor.png') 16 16, auto; }
         body {
             font-family: 'Inter', sans-serif;
             background: #0a0a0a;
             color: #fff;
             overflow-x: hidden;
-            cursor: url('cursor.png') 0 0, auto;
+            cursor: url('cursor.png') 16 16, auto;
         }
         a, button, .nav-dot, .gb-btn, .play-btn, .ctrl-btn, .track-btn, .volume-icon, .progress-bar {
-            cursor: url('cursor.png') 0 0, pointer !important;
+            cursor: url('cursor.png') 16 16, pointer !important;
         }
 
         .section {
