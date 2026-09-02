@@ -923,47 +923,42 @@
         const durationEl = document.getElementById('duration');
         let isPlaying = false;
         let hasUnlocked = false;
+        let userPaused = false;
         audio.volume = 0.75;
-        audio.muted = true; // start muted so browsers allow autoplay
+        audio.muted = true;
+        audio.loop = true;
         audio.autoplay = true;
 
         function updatePlayBtn() { playBtn.textContent = isPlaying ? '⏸' : '▶'; }
+        audio.addEventListener('play', ()=>{ isPlaying=true; updatePlayBtn(); });
+        audio.addEventListener('pause', ()=>{ if (!audio.ended) { isPlaying=false; updatePlayBtn(); }});
+        audio.addEventListener('playing', ()=>{ isPlaying=true; updatePlayBtn(); });
 
-        // try muted autoplay immediately (always allowed)
-        function tryMutedPlay() { audio.muted = true; audio.play().then(()=>{ isPlaying=true; updatePlayBtn(); }).catch(()=>{}); }
+        function tryMutedPlay() { audio.muted = true; audio.play().then(()=>{ isPlaying=true; }).catch(()=>{}); }
         document.addEventListener('DOMContentLoaded', tryMutedPlay);
         window.addEventListener('load', tryMutedPlay);
-        // also try right away
         tryMutedPlay();
 
-        // ANY micro movement instantly unmutes and plays with sound — then loops forever until user pauses
         function unlockAudio() {
             if (hasUnlocked) return;
-            // don't auto-resume if user manually paused
-            if (!isPlaying && audio.paused && hasUnlocked) return;
-            audio.muted = false;
+            if (userPaused) return;
             const v = parseInt(document.getElementById('volSlider')?.value || '75');
             audio.volume = Math.max(0, Math.min(1, (v/100)**1.5));
+            // if already playing muted, just unmute
+            if (isPlaying && audio.muted) { audio.muted = false; hasUnlocked = true; updatePlayBtn(); return; }
+            audio.muted = false;
             audio.play().then(()=>{
                 isPlaying = true;
                 hasUnlocked = true;
                 updatePlayBtn();
             }).catch(()=>{
-                // still blocked, keep trying
                 audio.muted = true;
                 audio.play().catch(()=>{});
             });
-            // if already playing muted, just unmute
-            if (isPlaying && audio.muted) { audio.muted = false; hasUnlocked = true; }
         }
         ['mousemove','mousedown','keydown','touchstart','wheel','scroll','pointermove','click'].forEach(ev => {
             window.addEventListener(ev, unlockAudio, { passive: true });
         });
-        // keep retrying every 200ms until unlocked (covers any edge case)
-        const unlockInterval = setInterval(()=>{
-            if (hasUnlocked) { clearInterval(unlockInterval); return; }
-            // if user moved even 1px, unlockAudio already fired via mousemove
-        }, 200);
 
         // Click sound on every click (new)
         const clickSfx = new Audio('click.mp3');
@@ -997,12 +992,12 @@
             currentTimeEl.textContent = '0:00';
             durationEl.textContent = '0:00';
             isPlaying = false;
+            userPaused = false;
             hasUnlocked = true;
             audio.muted = false;
             const v = parseInt(document.getElementById('volSlider')?.value || '75');
             audio.volume = Math.max(0, Math.min(1, (v/100)**1.5));
-            // auto-play new track instantly
-            audio.play().then(()=>{ isPlaying=true; updatePlayBtn(); }).catch(()=>{});
+            audio.play().then(()=>{ isPlaying=true; updatePlayBtn(); }).catch(()=>{ isPlaying=false; updatePlayBtn(); });
         }
         document.querySelectorAll('.track-btn').forEach(btn => {
             btn.addEventListener('click', () => switchTrack(btn.dataset.track));
@@ -1028,14 +1023,17 @@
         playBtn.addEventListener('click', () => {
             if (isPlaying) {
                 audio.pause();
-                playBtn.textContent = '▶';
                 isPlaying = false;
-                hasUnlocked = true; // don't auto-resume on next mousemove after manual pause
+                userPaused = true;
+                hasUnlocked = true;
+                updatePlayBtn();
             } else {
+                userPaused = false;
+                hasUnlocked = true;
                 audio.muted = false;
                 const v = parseInt(document.getElementById('volSlider')?.value || '75');
                 audio.volume = Math.max(0, Math.min(1, (v/100)**1.5));
-                audio.play().then(()=>{ isPlaying=true; hasUnlocked=true; updatePlayBtn(); }).catch(()=>{});
+                audio.play().then(()=>{ isPlaying=true; updatePlayBtn(); }).catch(()=>{});
             }
         });
 
