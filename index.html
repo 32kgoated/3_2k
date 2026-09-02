@@ -887,40 +887,48 @@
         const currentTimeEl = document.getElementById('currentTime');
         const durationEl = document.getElementById('duration');
         let isPlaying = false;
-        let hasInteracted = false;
+        let hasUnlocked = false;
         audio.volume = 0.75;
+        audio.muted = true; // start muted so browsers allow autoplay
+        audio.autoplay = true;
 
-        function tryPlay(withSound) {
-            audio.muted = !withSound;
-            return audio.play().then(() => {
-                playBtn.textContent = '⏸';
+        function updatePlayBtn() { playBtn.textContent = isPlaying ? '⏸' : '▶'; }
+
+        // try muted autoplay immediately (always allowed)
+        function tryMutedPlay() { audio.muted = true; audio.play().then(()=>{ isPlaying=true; updatePlayBtn(); }).catch(()=>{}); }
+        document.addEventListener('DOMContentLoaded', tryMutedPlay);
+        window.addEventListener('load', tryMutedPlay);
+        // also try right away
+        tryMutedPlay();
+
+        // ANY micro movement instantly unmutes and plays with sound — then loops forever until user pauses
+        function unlockAudio() {
+            if (hasUnlocked) return;
+            // don't auto-resume if user manually paused
+            if (!isPlaying && audio.paused && hasUnlocked) return;
+            audio.muted = false;
+            const v = parseInt(document.getElementById('volSlider')?.value || '75');
+            audio.volume = Math.max(0, Math.min(1, (v/100)**1.5));
+            audio.play().then(()=>{
                 isPlaying = true;
-                if (withSound) hasInteracted = true;
-                return true;
-            }).catch(() => false);
+                hasUnlocked = true;
+                updatePlayBtn();
+            }).catch(()=>{
+                // still blocked, keep trying
+                audio.muted = true;
+                audio.play().catch(()=>{});
+            });
+            // if already playing muted, just unmute
+            if (isPlaying && audio.muted) { audio.muted = false; hasUnlocked = true; }
         }
-
-        // Try autoplay with sound instantly, fallback to muted autoplay (browsers block sound without gesture)
-        document.addEventListener('DOMContentLoaded', () => {
-            tryPlay(true).then(ok => { if (!ok) tryPlay(false); });
+        ['mousemove','mousedown','keydown','touchstart','wheel','scroll','pointermove','click'].forEach(ev => {
+            window.addEventListener(ev, unlockAudio, { passive: true });
         });
-        window.addEventListener('load', () => {
-            if (!isPlaying) tryPlay(true).then(ok => { if (!ok && !isPlaying) tryPlay(false); });
-        });
-
-        // Any tiny interaction (scroll, move, touch) unmutes — feels like auto-play
-        const unlockEvents = ['click','keydown','touchstart','wheel','scroll','mousemove','pointerdown'];
-        unlockEvents.forEach(ev => {
-            document.addEventListener(ev, () => {
-                if (hasInteracted) return;
-                hasInteracted = true;
-                audio.muted = false;
-                // re-apply volume curve
-                const v = parseInt(document.getElementById('volSlider').value || '75');
-                audio.volume = Math.max(0, Math.min(1, (v/100)**1.5));
-                if (!isPlaying) audio.play().then(() => { playBtn.textContent = '⏸'; isPlaying = true; }).catch(()=>{});
-            }, { once: true, passive: true });
-        });
+        // keep retrying every 200ms until unlocked (covers any edge case)
+        const unlockInterval = setInterval(()=>{
+            if (hasUnlocked) { clearInterval(unlockInterval); return; }
+            // if user moved even 1px, unlockAudio already fired via mousemove
+        }, 200);
 
         function formatTime(s) {
             if (isNaN(s)) return '0:00';
@@ -934,10 +942,12 @@
                 audio.pause();
                 playBtn.textContent = '▶';
                 isPlaying = false;
+                hasUnlocked = true; // don't auto-resume on next mousemove after manual pause
             } else {
-                audio.play();
-                playBtn.textContent = '⏸';
-                isPlaying = true;
+                audio.muted = false;
+                const v = parseInt(document.getElementById('volSlider')?.value || '75');
+                audio.volume = Math.max(0, Math.min(1, (v/100)**1.5));
+                audio.play().then(()=>{ isPlaying=true; hasUnlocked=true; updatePlayBtn(); }).catch(()=>{});
             }
         });
 
