@@ -491,12 +491,24 @@
             margin-bottom: 36px;
         }
 
-        .skill-category {
-            margin-bottom: 28px;
+        .skills-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px 48px;
+            align-items: start;
         }
-
-        .skill-category:last-child {
+        .skill-category {
             margin-bottom: 0;
+        }
+        .skill-icon {
+            width: 14px;
+            height: 14px;
+            vertical-align: middle;
+            margin-right: 6px;
+            margin-top: -2px;
+            filter: brightness(0) invert(1);
+            opacity: 0.9;
+            display: inline-block;
         }
 
         .skill-label {
@@ -760,7 +772,9 @@
             padding: 12px 14px;
             animation: fadeUp 0.3s ease;
             word-break: break-word;
+            position: relative;
         }
+
         .gb-note-name {
             font-size: 11px;
             font-weight: 700;
@@ -802,6 +816,7 @@
             .pfp-glow { width: 148px; height: 148px; }
             .player-card, .skills-card { padding: 28px; }
             .skills-heading { font-size: 24px; }
+            .skills-grid { grid-template-columns: 1fr; gap: 24px; }
             .nav-dots { right: 12px; }
         }
     </style>
@@ -879,36 +894,37 @@
     <section class="section skills-section" id="sec2">
         <div class="skills-card fade-up">
             <div class="view-counter"><span class="view-icon">👁</span> <span id="viewCount">12</span></div>
-            <div class="skills-heading">i like coding</div>
-            <div class="skills-sub">full-stack developer</div>
+            <div class="skills-heading">Skills & Stack</div>
+            <div class="skills-sub">i like coding</div>
 
+            <div class="skills-grid">
             <div class="skill-category">
                 <div class="skill-label">Frontend</div>
                 <div class="skill-tags">
-                    <span class="skill-tag highlight">html</span>
-                    <span class="skill-tag highlight">css</span>
-                    <span class="skill-tag highlight">javascript</span>
+                    <span class="skill-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/html5/html5-plain.svg" class="skill-icon" alt=""> html</span>
+                    <span class="skill-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/css3/css3-plain.svg" class="skill-icon" alt=""> css</span>
+                    <span class="skill-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-plain.svg" class="skill-icon" alt=""> javascript</span>
                 </div>
             </div>
 
             <div class="skill-category">
                 <div class="skill-label">Backend</div>
                 <div class="skill-tags">
-                    <span class="skill-tag">python</span>
-                    <span class="skill-tag">java</span>
-                    <span class="skill-tag">c++</span>
-                    <span class="skill-tag">node</span>
+                    <span class="skill-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-plain.svg" class="skill-icon" alt=""> python</span>
+                    <span class="skill-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/java/java-plain.svg" class="skill-icon" alt=""> java</span>
+                    <span class="skill-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/cplusplus/cplusplus-plain.svg" class="skill-icon" alt=""> c++</span>
+                    <span class="skill-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nodejs/nodejs-plain.svg" class="skill-icon" alt=""> node</span>
                 </div>
             </div>
 
             <div class="skill-category">
                 <div class="skill-label">Scripting</div>
                 <div class="skill-tags">
-                    <span class="skill-tag">lua</span>
-                    <span class="skill-tag">luau</span>
+                    <span class="skill-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/lua/lua-plain.svg" class="skill-icon" alt=""> lua</span>
+                    <span class="skill-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/lua/lua-plain.svg" class="skill-icon" alt=""> luau</span>
                 </div>
             </div>
-
+            </div>
 
         </div>
     </section>
@@ -1129,14 +1145,12 @@
             return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
         }
         async function fetchRemoteNotes() {
-            // if Firebase not configured yet, skip remote
             if (!FIREBASE_URL || FIREBASE_URL.includes('REPLACE_WITH')) return null;
             try {
                 const r = await fetch(FIREBASE_URL);
                 if (!r.ok) return null;
                 const raw = await r.json();
-                // Firebase returns object { "-Nxxx": {name,msg,time}, ... } or null
-                const data = raw ? Object.values(raw) : [];
+                const data = raw ? Object.entries(raw).map(([id, v]) => ({ id, ...v })) : [];
                 try { localStorage.setItem(GB_KEY, JSON.stringify(data)); } catch(e){}
                 return data;
             } catch(e) { return null; }
@@ -1146,16 +1160,16 @@
             if (remote !== null) return remote;
             try { return JSON.parse(localStorage.getItem(GB_KEY) || '[]'); } catch(e){ return []; }
         }
+
         async function renderWall() {
             gbWall.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;font-size:11px;color:rgba(255,255,255,0.3);">loading...</div>';
             const notes = await loadNotes();
             gbWall.innerHTML = '';
             if (notes.length === 0) return;
-            const isPinned = n => n.name.toLowerCase() === '3_2k';
+            const isPinned = n => !!n.pinned || (n.pinned === undefined && n.name.toLowerCase() === '3_2k');
             const pinned = notes.filter(isPinned);
             const rest = notes.filter(n => !isPinned(n));
             const ordered = [...pinned, ...[...rest].reverse()];
-            // pinned first, then newest rest
             ordered.forEach(n => {
                 const div = document.createElement('div');
                 div.className = 'gb-note' + (isPinned(n) ? ' pinned' : '');
@@ -1191,7 +1205,7 @@
             name = censor(name);
             msg = censor(msg);
             if (msg.length > 30) msg = msg.slice(0,30);
-            const payload = { name, msg, time: Date.now() };
+            const payload = { name, msg, time: Date.now(), pinned: false };
             // if Firebase not configured, use localStorage only (so you can test before Firebase is ready)
             const useRemote = FIREBASE_URL && !FIREBASE_URL.includes('REPLACE_WITH');
             if (useRemote) {
