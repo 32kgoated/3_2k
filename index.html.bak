@@ -24,17 +24,11 @@
             scroll-snap-type: y mandatory;
         }
 
-        *, *::before, *::after { cursor: url('cursor.png') 16 16, auto !important; }
-        html { cursor: url('cursor.png') 16 16, auto; }
         body {
             font-family: 'Inter', sans-serif;
             background: #0a0a0a;
             color: #fff;
             overflow-x: hidden;
-            cursor: url('cursor.png') 16 16, auto;
-        }
-        a, button, .nav-dot, .gb-btn, .play-btn, .ctrl-btn, .track-btn, .volume-icon, .progress-bar {
-            cursor: url('cursor.png') 16 16, pointer !important;
         }
 
         .section {
@@ -183,45 +177,11 @@
             max-width: 90vw;
         }
 
-        .track-switcher {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 18px;
-            justify-content: flex-start;
-            overflow-x: auto;
-            overflow-y: hidden;
-            padding-bottom: 6px;
-            scrollbar-width: thin;
-            scrollbar-color: rgba(255,255,255,0.15) transparent;
-            flex-wrap: nowrap;
-            -webkit-overflow-scrolling: touch;
-        }
-        .track-switcher::-webkit-scrollbar { height: 4px; }
-        .track-switcher::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
-        .track-btn {
-            padding: 6px 14px;
-            border-radius: 100px;
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            text-transform: lowercase;
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.08);
-            color: rgba(255,255,255,0.5);
-            transition: all 0.2s;
-        }
-        .track-btn.active {
-            background: #fff;
-            border-color: #fff;
-            color: #000;
-        }
-        .track-btn:hover { border-color: rgba(255,255,255,0.2); }
-
         .player-header {
             display: flex;
             align-items: center;
             gap: 16px;
-            margin-bottom: 18px;
+            margin-bottom: 30px;
         }
 
         .player-art {
@@ -458,23 +418,7 @@
             padding: 48px;
             width: 600px;
             max-width: 90vw;
-            position: relative;
         }
-        .view-counter {
-            position: absolute;
-            bottom: 16px;
-            right: 16px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 12px;
-            color: rgba(255,255,255,0.35);
-            font-family: 'JetBrains Mono', monospace;
-            background: none;
-            border: none;
-            padding: 0;
-        }
-        .view-counter .view-icon { font-size: 16px; opacity: 0.8; }
 
         .skills-heading {
             font-family: 'HoshikoSatsuki', 'Inter', sans-serif;
@@ -522,16 +466,20 @@
             background: rgba(255,255,255,0.06);
             border: 1px solid rgba(255,255,255,0.08);
             color: rgba(255,255,255,0.8);
+            transition: all 0.2s;
+        }
+
+        .skill-tag:hover {
+            background: rgba(139, 92, 246, 0.15);
+            border-color: rgba(139, 92, 246, 0.3);
+            color: rgba(255,255,255,0.6);
+            transform: translateY(-2px);
         }
 
         .skill-tag.highlight {
-            padding: 8px 16px;
-            border-radius: 100px;
-            font-size: 13px;
-            font-weight: 500;
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.08);
-            color: rgba(255,255,255,0.8);
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(139,92,246,0.3);
+            color: #c4b5fd;
         }
 
         .divider {
@@ -734,12 +682,11 @@
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
             gap: 10px;
-            max-height: 210px;
+            max-height: 320px;
             overflow-y: auto;
             padding-right: 4px;
             scrollbar-width: thin;
             scrollbar-color: rgba(255,255,255,0.15) transparent;
-            align-content: start;
         }
         .guestbook-wall::-webkit-scrollbar { width: 4px; }
         .guestbook-wall::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
@@ -842,14 +789,13 @@
     <section class="section music-section" id="sec1">
         <div class="player-card fade-up">
             <div class="player-header">
-                <div class="player-art"><img id="playerArtImg" src="blushin.png" alt="blushin" style="width:100%;height:100%;object-fit:cover;border-radius:12px;"></div>
+                <div class="player-art"><img src="blushin.png" alt="blushin" style="width:100%;height:100%;object-fit:cover;border-radius:12px;"></div>
                 <div class="player-info">
                     <div class="player-now-playing">Now Playing</div>
-                    <div class="player-title" id="playerTitle">blushin 4 what</div>
-                    <div class="player-artist" id="playerArtist">xoly</div>
+                    <div class="player-title">blushin</div>
+                    <div class="player-artist">xoly</div>
                 </div>
             </div>
-
 
             <div class="progress-container">
                 <div class="progress-bar" id="progressBar">
@@ -862,9 +808,9 @@
             </div>
 
             <div class="player-controls">
-                <button class="ctrl-btn" id="prevBtn" title="Previous">⏮</button>
+                <button class="ctrl-btn" title="Previous">⏮</button>
                 <button class="play-btn" id="playBtn" title="Play">▶</button>
-                <button class="ctrl-btn" id="nextBtn" title="Next">⏭</button>
+                <button class="ctrl-btn" title="Next">⏭</button>
                 <div class="volume-wrapper">
                     <button class="volume-icon" id="volIcon">🔊</button>
                     <div class="volume-slider-wrap">
@@ -878,7 +824,6 @@
     <!-- Section 3 — Skills -->
     <section class="section skills-section" id="sec2">
         <div class="skills-card fade-up">
-            <div class="view-counter"><span class="view-icon">👁</span> <span id="viewCount">12</span></div>
             <div class="skills-heading">i like coding</div>
             <div class="skills-sub">full-stack developer</div>
 
@@ -943,104 +888,47 @@
         const durationEl = document.getElementById('duration');
         let isPlaying = false;
         let hasUnlocked = false;
-        let userPaused = false;
         audio.volume = 0.75;
-        audio.muted = true;
-        audio.loop = true;
+        audio.muted = true; // start muted so browsers allow autoplay
         audio.autoplay = true;
 
         function updatePlayBtn() { playBtn.textContent = isPlaying ? '⏸' : '▶'; }
-        audio.addEventListener('play', ()=>{ isPlaying=true; updatePlayBtn(); });
-        audio.addEventListener('pause', ()=>{ if (!audio.ended) { isPlaying=false; updatePlayBtn(); }});
-        audio.addEventListener('playing', ()=>{ isPlaying=true; updatePlayBtn(); });
 
-        function tryMutedPlay() { audio.muted = true; audio.play().then(()=>{ isPlaying=true; }).catch(()=>{}); }
+        // try muted autoplay immediately (always allowed)
+        function tryMutedPlay() { audio.muted = true; audio.play().then(()=>{ isPlaying=true; updatePlayBtn(); }).catch(()=>{}); }
         document.addEventListener('DOMContentLoaded', tryMutedPlay);
         window.addEventListener('load', tryMutedPlay);
+        // also try right away
         tryMutedPlay();
 
+        // ANY micro movement instantly unmutes and plays with sound — then loops forever until user pauses
         function unlockAudio() {
             if (hasUnlocked) return;
-            if (userPaused) return;
+            // don't auto-resume if user manually paused
+            if (!isPlaying && audio.paused && hasUnlocked) return;
+            audio.muted = false;
             const v = parseInt(document.getElementById('volSlider')?.value || '75');
             audio.volume = Math.max(0, Math.min(1, (v/100)**1.5));
-            // if already playing muted, just unmute
-            if (isPlaying && audio.muted) { audio.muted = false; hasUnlocked = true; updatePlayBtn(); return; }
-            audio.muted = false;
             audio.play().then(()=>{
                 isPlaying = true;
                 hasUnlocked = true;
                 updatePlayBtn();
             }).catch(()=>{
+                // still blocked, keep trying
                 audio.muted = true;
                 audio.play().catch(()=>{});
             });
+            // if already playing muted, just unmute
+            if (isPlaying && audio.muted) { audio.muted = false; hasUnlocked = true; }
         }
         ['mousemove','mousedown','keydown','touchstart','wheel','scroll','pointermove','click'].forEach(ev => {
             window.addEventListener(ev, unlockAudio, { passive: true });
         });
-
-        // Click sound on every click (new)
-        const clickSfx = new Audio('click.mp3');
-        clickSfx.preload = 'auto';
-        clickSfx.volume = 0.4;
-        document.addEventListener('click', () => {
-            clickSfx.currentTime = 0;
-            clickSfx.play().catch(()=>{});
-        });
-
-        // Playlist: 11 tracks (blushin + angel + 9 new)
-        const tracks = {
-            blushin: { src: 'blushin.mp3', title: 'blushin 4 what', artist: 'xoly', art: 'blushin.png' },
-            angel: { src: 'angel.mp3', title: 'angel', artist: 'xoly & gomi', art: 'angel.png' },
-            float: { src: 'xoly-float-away.mp3', title: 'float away', artist: 'xoly feat. 67', art: 'xoly-float-away.jpg' },
-            mom: { src: 'xoly-mom-seen-me-high.mp3', title: 'mom seen me high', artist: 'xoly', art: 'xoly-mom-seen-me-high.jpg' },
-            tokyo: { src: 'xoly-tokyo-tab-trippin.mp3', title: 'tokyo tab trippin', artist: 'xoly', art: 'xoly-tokyo-tab-trippin.jpg' },
-            shadow: { src: 'xoly-shadow-klub.mp3', title: 'shadow klub', artist: 'xoly feat. 67', art: 'xoly-shadow-klub.jpg' },
-            notreal: { src: 'xoly-ur-n0t-r34l.mp3', title: 'ur n0t r34l', artist: 'xoly', art: 'xoly-ur-n0t-r34l.jpg' },
-            loveletter: { src: 'gomi-love-letter.mp3', title: 'love letter', artist: 'gomi', art: 'gomi-love-letter.jpg' },
-            stare: { src: 'gomi-stare.mp3', title: 'stare', artist: 'gomi', art: 'gomi-stare.jpg' },
-            xtayalive: { src: 'jnhygs-xtayalive.mp3', title: 'XTAYALIVE', artist: 'jnhygs & 9lives', art: 'jnhygs-xtayalive.jpg' },
-            sally: { src: 'thuggpint-hey-there-sally.mp3', title: 'hey there sally', artist: 'thuggpint', art: 'thuggpint-hey-there-sally.jpg' }
-        };
-        let currentTrack = 'blushin';
-        function switchTrack(id) {
-            if (!tracks[id] || currentTrack === id) return;
-            currentTrack = id;
-            const t = tracks[id];
-            const wasPlaying = isPlaying;
-            audio.pause();
-            audio.src = t.src;
-            audio.load();
-            audio.loop = true;
-            document.getElementById('playerTitle').textContent = t.title;
-            document.getElementById('playerArtist').textContent = t.artist;
-            document.getElementById('playerArtImg').src = t.art;
-            document.querySelectorAll('.track-btn').forEach(b => b.classList.toggle('active', b.dataset.track === id));
-            progressFill.style.width = '0%';
-            currentTimeEl.textContent = '0:00';
-            durationEl.textContent = '0:00';
-            isPlaying = false;
-            userPaused = false;
-            hasUnlocked = true;
-            audio.muted = false;
-            const v = parseInt(document.getElementById('volSlider')?.value || '75');
-            audio.volume = Math.max(0, Math.min(1, (v/100)**1.5));
-            audio.play().then(()=>{ isPlaying=true; updatePlayBtn(); }).catch(()=>{ isPlaying=false; updatePlayBtn(); });
-        }
-        document.querySelectorAll('.track-btn').forEach(btn => {
-            btn.addEventListener('click', () => switchTrack(btn.dataset.track));
-        });
-        document.getElementById('prevBtn').addEventListener('click', () => {
-            const ids = Object.keys(tracks);
-            const idx = ids.indexOf(currentTrack);
-            switchTrack(ids[(idx - 1 + ids.length) % ids.length]);
-        });
-        document.getElementById('nextBtn').addEventListener('click', () => {
-            const ids = Object.keys(tracks);
-            const idx = ids.indexOf(currentTrack);
-            switchTrack(ids[(idx + 1) % ids.length]);
-        });
+        // keep retrying every 200ms until unlocked (covers any edge case)
+        const unlockInterval = setInterval(()=>{
+            if (hasUnlocked) { clearInterval(unlockInterval); return; }
+            // if user moved even 1px, unlockAudio already fired via mousemove
+        }, 200);
 
         function formatTime(s) {
             if (isNaN(s)) return '0:00';
@@ -1052,17 +940,14 @@
         playBtn.addEventListener('click', () => {
             if (isPlaying) {
                 audio.pause();
+                playBtn.textContent = '▶';
                 isPlaying = false;
-                userPaused = true;
-                hasUnlocked = true;
-                updatePlayBtn();
+                hasUnlocked = true; // don't auto-resume on next mousemove after manual pause
             } else {
-                userPaused = false;
-                hasUnlocked = true;
                 audio.muted = false;
                 const v = parseInt(document.getElementById('volSlider')?.value || '75');
                 audio.volume = Math.max(0, Math.min(1, (v/100)**1.5));
-                audio.play().then(()=>{ isPlaying=true; updatePlayBtn(); }).catch(()=>{});
+                audio.play().then(()=>{ isPlaying=true; hasUnlocked=true; updatePlayBtn(); }).catch(()=>{});
             }
         });
 
@@ -1223,46 +1108,6 @@
         gbName.addEventListener('keydown', e => { if (e.key === 'Enter') gbMsg.focus(); });
         renderWall();
         updateCount();
-
-        // Views — 1 per IP (Firebase, default 12)
-        const VIEW_URL = 'https://k-3b9c0-default-rtdb.firebaseio.com/views.json';
-        const VIEW_IPS_BASE = 'https://k-3b9c0-default-rtdb.firebaseio.com/viewIPs';
-        const viewEl = document.getElementById('viewCount');
-        (async () => {
-            try {
-                // get shared count
-                const r = await fetch(VIEW_URL);
-                let current = null;
-                try { current = await r.json(); } catch(e) {}
-                let count = (typeof current === 'number') ? current : (current !== null ? parseInt(current) || 12 : 12);
-                if (current === null) {
-                    // init DB to 12 if empty
-                    try { await fetch(VIEW_URL, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(12) }); } catch(e){}
-                    viewEl.textContent = '12';
-                    current = 12;
-                    count = 12;
-                } else {
-                    viewEl.textContent = String(count);
-                }
-                // get IP
-                let ip = null;
-                try {
-                    const ipRes = await fetch('https://api.ipify.org?format=json');
-                    if (ipRes.ok) { const j = await ipRes.json(); ip = j.ip; }
-                } catch(e) {}
-                if (!ip) return; // can't track, just display
-                const ipKey = ip.replace(/\./g, '_').replace(/:/g, '_');
-                const ipUrl = `${VIEW_IPS_BASE}/${ipKey}.json`;
-                const ipCheck = await fetch(ipUrl);
-                let exists = null;
-                try { exists = await ipCheck.json(); } catch(e) {}
-                if (exists) return; // already counted
-                const next = count + 1;
-                viewEl.textContent = String(next);
-                await fetch(VIEW_URL, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(next) });
-                await fetch(ipUrl, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(true) });
-            } catch(e) { viewEl.textContent = viewEl.textContent || '12'; }
-        })();
 
         // Nav dots
         const sections = document.querySelectorAll('.section');
